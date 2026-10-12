@@ -656,6 +656,30 @@
    "links": {
     "arxiv": "https://arxiv.org/abs/2501.13989"
    }
+  },
+  {
+   "id": "hlinear-2026",
+   "title": "HLinear",
+   "year": 2026,
+   "venue": "投稿中",
+   "authors": "Li, Ziqiong et al.（岳文振合作）",
+   "stage": "input",
+   "era": "era3",
+   "tags": [
+    "linear",
+    "hilbert",
+    "transform-domain",
+    "under-review"
+   ],
+   "new_cognition": "Hilbert 变换提取振荡态先验（包络+相位）：从“数值”到“振荡态”；Hilbert 引导的通道编码做振荡感知的变量间交互，保持轻量。",
+   "corrects": "变换域只有傅里叶/正交基可选；变量交互不需要振荡先验。",
+   "corrected_by": [],
+   "problem": "非平稳振荡动态的建模",
+   "method": "Hilbert 变换 + 振荡先验提取 OPE + Hilbert 引导通道编码 HGCE",
+   "insight": "变换域线的最新延续；同期独立工作 AOSNET 验证“振荡态”是小热点",
+   "links": {
+    "github": "https://github.com/1004qiong/hlinear"
+   }
   }
  ]
 }
