@@ -43,7 +43,37 @@
     "desc": "当前共识：ETT/电力/交通/天气/汇率是事实标准 benchmark，但刷榜边际收益递减；概率、冷启动、跨实体等新方向的评估体系还没建立。"
    }
   ],
-  "title": "多变量时间序列预测 · 认知演进史"
+  "title": "多变量时间序列预测 · 认知演进史",
+  "eras": [
+   {
+    "id": "foundation",
+    "name": "奠基与生成式源头",
+    "years": "2017–2021",
+    "color": "#6b7280",
+    "desc": "点估计→分布估计（DeepAR）、极简架构的有效性（N-BEATS）、生成式预测的源头（TimeGrad/CSDI）。"
+   },
+   {
+    "id": "era1",
+    "name": "时代一 · 输入处理",
+    "years": "2021–2023",
+    "color": "#b45309",
+    "desc": "先把数据喂对：分布偏移、非平稳、分解、patching。DLinear 为这个时代收尾——用最简单的分解+线性，终结了 Transformer 内卷。"
+   },
+   {
+    "id": "era2",
+    "name": "时代二 · 架构",
+    "years": "2021–2025",
+    "color": "#2b6cb0",
+    "desc": "换更好的模型：高效 attention、2D 周期、MLP 混合、变量级建模、LLM。DLinear 之后共识：归纳偏置 > 模型复杂度。"
+   },
+   {
+    "id": "era3",
+    "name": "时代三 · 目标与推理",
+    "years": "2024–",
+    "color": "#7c3aed",
+    "desc": "监督什么、怎么推理：vLinear 扭监督目标，FlowCast 扭推理步数。单步概率预测是下一个空白。"
+   }
+  ]
  },
  "papers": [
   {
@@ -68,7 +98,8 @@
    ],
    "title": "DeepAR",
    "venue": "arXiv",
-   "year": 2017
+   "year": 2017,
+   "era": "foundation"
   },
   {
    "authors": "Oreshkin et al.",
@@ -92,7 +123,8 @@
    ],
    "title": "N-BEATS",
    "venue": "ICLR",
-   "year": 2020
+   "year": 2020,
+   "era": "foundation"
   },
   {
    "authors": "Zhou et al.",
@@ -116,7 +148,8 @@
    ],
    "title": "Informer",
    "venue": "AAAI",
-   "year": 2021
+   "year": 2021,
+   "era": "era2"
   },
   {
    "authors": "Wu et al.",
@@ -141,7 +174,8 @@
    ],
    "title": "Autoformer",
    "venue": "NeurIPS",
-   "year": 2021
+   "year": 2021,
+   "era": "era1"
   },
   {
    "authors": "Zhou et al.",
@@ -163,7 +197,8 @@
    ],
    "title": "FEDformer",
    "venue": "ICML",
-   "year": 2022
+   "year": 2022,
+   "era": "era1"
   },
   {
    "authors": "Liu et al.",
@@ -187,7 +222,8 @@
    ],
    "title": "Non-stationary Transformer",
    "venue": "NeurIPS",
-   "year": 2022
+   "year": 2022,
+   "era": "era1"
   },
   {
    "authors": "Zeng et al.",
@@ -212,7 +248,8 @@
    ],
    "title": "DLinear",
    "venue": "AAAI",
-   "year": 2023
+   "year": 2023,
+   "era": "era1"
   },
   {
    "authors": "Nie et al.",
@@ -236,7 +273,8 @@
    ],
    "title": "PatchTST",
    "venue": "ICLR",
-   "year": 2023
+   "year": 2023,
+   "era": "era1"
   },
   {
    "authors": "Wu et al.",
@@ -258,7 +296,8 @@
    ],
    "title": "TimesNet",
    "venue": "ICLR",
-   "year": 2023
+   "year": 2023,
+   "era": "era2"
   },
   {
    "authors": "Kim et al.",
@@ -280,7 +319,8 @@
    ],
    "title": "RevIN",
    "venue": "ICLR",
-   "year": 2023
+   "year": 2023,
+   "era": "era1"
   },
   {
    "id": "itransformer-2024",
@@ -302,7 +342,8 @@
    "insight": "时序建模的瓶颈不在时间维（线性就够），而在变量维",
    "links": {
     "arxiv": "https://arxiv.org/abs/2310.06625"
-   }
+   },
+   "era": "era2"
   },
   {
    "id": "timemixer-2024",
@@ -324,7 +365,8 @@
    "insight": "分解思想（DLinear/Autoformer）与 Mixer 架构的结合",
    "links": {
     "arxiv": "https://arxiv.org/abs/2405.14616"
-   }
+   },
+   "era": "era2"
   },
   {
    "id": "timegrad-2021",
@@ -349,7 +391,8 @@
    "insight": "把图像 diffusion 的成功经验搬到时序，代价是推理慢（数百步）",
    "links": {
     "arxiv": "https://arxiv.org/abs/2101.00746"
-   }
+   },
+   "era": "foundation"
   },
   {
    "id": "csdi-2021",
@@ -373,7 +416,8 @@
    "insight": "非自回归生成避免误差累积，但仍需数百去噪步",
    "links": {
     "arxiv": "https://arxiv.org/abs/2107.06277"
-   }
+   },
+   "era": "foundation"
   },
   {
    "id": "timellm-2024",
@@ -395,7 +439,8 @@
    "insight": "模态对齐 > 从零训练；prompt 思想进入时序",
    "links": {
     "arxiv": "https://arxiv.org/abs/2310.01728"
-   }
+   },
+   "era": "era2"
   },
   {
    "id": "tsflow-2025",
@@ -420,7 +465,8 @@
    "insight": "生成质量很大程度上由 prior 决定——prior 设计是 FM 的核心战场",
    "links": {
     "arxiv": "https://arxiv.org/abs/2410.03024"
-   }
+   },
+   "era": "era3"
   },
   {
    "id": "meanflow-2025",
@@ -444,7 +490,8 @@
    "insight": "领域：图像生成；但思想（平均速度）是 FlowCast 单步的直接来源",
    "links": {
     "arxiv": "https://arxiv.org/abs/2505.13447"
-   }
+   },
+   "era": "era3"
   },
   {
    "id": "vlinear-2026",
@@ -468,7 +515,8 @@
    "insight": "损失设计比架构更重要：同样的 FM，换监督目标提升 8.6%",
    "links": {
     "arxiv": "https://arxiv.org/abs/2601.13768"
-   }
+   },
+   "era": "era3"
   },
   {
    "id": "flowcast-2026",
@@ -488,7 +536,8 @@
    "problem": "FM 时序预测的推理效率",
    "method": "Direct Forecast Field + Adaptive Weighted Loss + Temporal Interpolation Consistency",
    "insight": "vLinear 逻辑的终点：既然只关心终点，为什么还绕路？",
-   "links": {}
+   "links": {},
+   "era": "era3"
   },
   {
    "id": "sd3-2024",
@@ -510,7 +559,8 @@
    "insight": "领域：图像；但它是 FM 出圈的标志事件——时序 FM 站在它的肩上",
    "links": {
     "arxiv": "https://arxiv.org/abs/2403.03206"
-   }
+   },
+   "era": "era3"
   },
   {
    "id": "twinflow-2026",
@@ -532,7 +582,8 @@
    "insight": "领域：图像；单步技术的另一条路（自对抗 vs 平均速度），可迁移",
    "links": {
     "github": "https://github.com/AkaneTendo25/TwinFlow"
-   }
+   },
+   "era": "era3"
   },
   {
    "id": "mercerflow-2026",
@@ -554,7 +605,8 @@
    "insight": "核方法与生成建模的结合点",
    "links": {
     "arxiv": "https://arxiv.org/abs/2610.06039"
-   }
+   },
+   "era": "era3"
   }
  ]
 }

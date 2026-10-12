@@ -17,6 +17,7 @@
   "venue": "ICLR",
   "authors": "Author et al.",
   "stage": "loss",
+  "era": "era3",
   "tags": ["flow-matching", "one-step"],
   "new_cognition": "它让领域相信了什么（一句话）",
   "corrects": "它修正了谁的什么旧观点（一句话）",
@@ -35,6 +36,7 @@
 | `id` | ✓ | 唯一标识，格式 `短名-年份` |
 | `title` / `year` / `venue` / `authors` | ✓ | 基本信息 |
 | `stage` | ✓ | 所属 pipeline 阶段，8 选 1：`problem`（问题定义）`input`（输入处理）`decomposition`（分解）`backbone`（建模主干）`variables`（变量间关系）`loss`（损失函数）`inference`（推理采样）`evaluation`（评估） |
+| `era` | ✓ | 所属时代，4 选 1：`foundation`（奠基与生成式源头）`era1`（时代一·输入处理）`era2`（时代二·架构）`era3`（时代三·目标与推理）。时代定义在 `papers.json` 的 `meta.eras` 里 |
 | `new_cognition` | ✓ | **核心**：这篇论文让领域相信了什么新观点 |
 | `corrects` | ✓ | **核心**：它修正/推翻了之前哪篇的什么旧观点 |
 | `corrected_by` | | 后续哪篇修正了它（形成思想链） |
@@ -47,8 +49,7 @@
 读完一篇论文，顺手花 10 分钟加一条。重点写好 `new_cognition` 和 `corrects`——
 这是这个仓库区别于普通论文列表的全部价值。
 
-## 思想链与范式转移
+## 思想链
 
 `index.html` 里的 `CHAINS` 数组定义了几条主线的修正链（后一篇回答前一篇的问题），
-`ERAS` 数组定义了"三次范式转移"（输入处理时代 → 架构时代 → 目标与推理时代），
-有新主线时直接加。
+有新主线时直接加。时代色带由 `papers.json` 的 `meta.eras` 驱动，加新时代时同步加。
