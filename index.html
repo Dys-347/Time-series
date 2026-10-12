@@ -69,8 +69,14 @@ footer a{color:#2b6cb0}
 
 <section>
 <h2>Pipeline 全景</h2>
-<div class="sec-sub">点击阶段卡片，筛选该阶段的论文</div>
+<div class="sec-sub">每个阶段的"当前主要认知"——点击卡片筛选该阶段的论文</div>
 <div class="stages" id="stages"></div>
+</section>
+
+<section>
+<h2>三次范式转移</h2>
+<div class="sec-sub">这个领域的主战场迁移史：早期拼输入处理，后期拼模型，现在拼目标函数和推理</div>
+<div id="eras"></div>
 </section>
 
 <section>
@@ -97,6 +103,17 @@ footer a{color:#2b6cb0}
 </div>
 <script>
 let DATA=null, activeStage=null;
+const ERAS=[
+ {name:"时代一 · 输入处理（~2020–2023）：先把数据喂对",
+  desc:"领域最早的系统性战场。RevIN 治分布偏移、平稳化治非平稳、分解治趋势季节纠缠、patching 给 Transformer 语义 token。",
+  belief:"主导信念：输入表征决定上限，模型只是拟合器。"},
+ {name:"时代二 · 架构（2021–2025）：换更好的模型",
+  desc:"Informer→Autoformer→FEDformer 的 Transformer 内卷，被 DLinear 一记线性耳光打断；之后 PatchTST / iTransformer / TimesNet / TimeMixer / Mamba / LLM 六路并存。",
+  belief:"主导信念（DLinear 之后）：归纳偏置 > 模型复杂度。"},
+ {name:"时代三 · 目标与推理（2024–）：监督什么、怎么推理",
+  desc:"vLinear 把监督目标从速度场扭向最终序列；FlowCast 把多步积分扭向单步直达。战场从“用什么模型”转向“监督什么、怎么推理”。",
+  belief:"主导信念：去间接化——每个中间环节都要回答“真的必要吗”。"}
+];
 const CHAINS=[
  {name:"范式之争：复杂度 vs 简单", steps:[
    ["Informer (2021)","ProbSparse attention 让 Transformer 能做长时序"],
@@ -137,10 +154,11 @@ async function init(){
     document.querySelectorAll('.stage-card').forEach(x=>x.classList.toggle('active',x.dataset.stage===activeStage));
     syncChips(); render();
   }));
-  document.getElementById('chains').innerHTML=CHAINS.map(c=>
-    `<div class="chain"><div class="step"><b>⛓ ${c.name}</b></div>`+
+  document.getElementById('chains').innerHTML=CHAINS.map(c=>    `<div class="chain"><div class="step"><b>⛓ ${c.name}</b></div>`+
     c.steps.map((s,i)=>`${i?'<div class="arrow">↓ 修正 / 推进</div>':''}<div class="step"><b>${s[0]}</b> — ${s[1]}</div>`).join('')+
     `<div class="why">${c.why}</div></div>`).join('');
+  document.getElementById('eras').innerHTML=ERAS.map((e,i)=>
+    `<div class="chain" style="border-color:${['#b45309','#2b6cb0','#7c3aed'][i]}"><div class="step"><b>${e.name}</b></div><div class="step" style="font-size:13.5px">${e.desc}</div><div class="why">${e.belief}</div></div>`).join('');
   const chips=[["","全部"]].concat(stages.map(s=>[s.id,s.name]));
   document.getElementById('chips').innerHTML=chips.map(([v,n])=>
     `<span class="chip${v===''?' active':''}" data-v="${v}">${n}</span>`).join('');

@@ -3,44 +3,44 @@
   "description": "记录这个领域每篇重要论文提出了什么新认知、修正了什么旧认知。一部用论文写成的思想史。",
   "stages": [
    {
-    "desc": "预测什么：点估计还是分布？怎么形式化预测问题",
     "id": "problem",
-    "name": "问题定义"
+    "name": "问题定义",
+    "desc": "当前共识：点预测与概率预测两条线并存——前者拼 MSE/MAE，后者拼 CRPS/校准。概率预测是生成式方法（diffusion/FM）的主场；点预测的精度提升已接近平台期。"
    },
    {
-    "desc": "归一化、平稳化、patching：怎么把原始序列喂给模型",
     "id": "input",
-    "name": "输入处理"
+    "name": "输入处理",
+    "desc": "当前共识：怎么喂数据一度比用什么模型更重要。分布偏移用 RevIN、非平稳用平稳化+de-stationary、局部语义用 patching——这是 2021–2023 年最密集的战场，如今已成标配。"
    },
    {
-    "desc": "趋势/季节/小波/多尺度：把复杂信号拆开",
     "id": "decomposition",
-    "name": "分解"
+    "name": "分解",
+    "desc": "当前共识：趋势/季节分解从预处理变成了架构的一部分（Autoformer/FEDformer/DLinear）；但 PatchTST/iTransformer 证明不显式分解也能打——“分解是否必要”仍是开放争论。"
    },
    {
-    "desc": "Transformer / RNN / MLP / CNN / Mamba / LLM：用什么架构建模",
     "id": "backbone",
-    "name": "建模主干"
+    "name": "建模主干",
+    "desc": "当前共识（DLinear 之后）：归纳偏置 > 模型复杂度。Transformer（变量级）、MLP-Mixer（多尺度）、CNN（周期 2D 化）、线性、Mamba、LLM 六条路线并存，没有银弹。"
    },
    {
-    "desc": "channel 独立还是联合：多变量之间怎么交互",
     "id": "variables",
-    "name": "变量间关系"
+    "name": "变量间关系",
+    "desc": "当前共识：从 PatchTST 的 channel independence 到 iTransformer 的变量级 attention，收敛到“变量依赖值得建模，但要轻量”（vecTrans rank-1 即插即用）。"
    },
    {
-    "desc": "监督什么：速度场、最终序列、分布、分位数",
     "id": "loss",
-    "name": "损失函数"
+    "name": "损失函数",
+    "desc": "当前共识：vLinear 证明监督最终序列 > 监督速度场（+8.6%，有 MLE 理论背书）；概率预测转向 CRPS/分位数损失。损失设计是 2025–2026 的新战场。"
    },
    {
-    "desc": "多步还是单步、确定性还是采样：怎么从模型得到预测",
     "id": "inference",
-    "name": "推理采样"
+    "name": "推理采样",
+    "desc": "当前共识：图像范式的多步采样正在被抛弃——时序是近似确定性映射，单步直达（FlowCast）快约 100 倍且精度不丢。单步概率预测是下一个空白。"
    },
    {
-    "desc": "benchmark 与指标：用什么证明自己",
     "id": "evaluation",
-    "name": "评估"
+    "name": "评估",
+    "desc": "当前共识：ETT/电力/交通/天气/汇率是事实标准 benchmark，但刷榜边际收益递减；概率、冷启动、跨实体等新方向的评估体系还没建立。"
    }
   ],
   "title": "多变量时间序列预测 · 认知演进史"
