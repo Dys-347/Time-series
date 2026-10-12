@@ -607,6 +607,55 @@
     "arxiv": "https://arxiv.org/abs/2610.06039"
    },
    "era": "era3"
+  },
+  {
+   "id": "olinear-2025",
+   "title": "OLinear",
+   "year": 2025,
+   "venue": "NeurIPS",
+   "authors": "Yue et al. (PKU)",
+   "stage": "input",
+   "era": "era2",
+   "tags": [
+    "linear",
+    "transform-domain",
+    "attention-free"
+   ],
+   "new_cognition": "数据自适应正交变换 OrthoTrans：对时间 Pearson 相关矩阵做特征分解，得到解耦的变换域；NormLin（正数+行归一的线性层）模仿 attention 形式，效果超 attention、FLOPs 减半。",
+   "corrects": "变换域必须用固定基（傅里叶/小波）；attention 不可替代。",
+   "corrected_by": [
+    "vlinear-2026"
+   ],
+   "problem": "时域中纠缠的时间依赖",
+   "method": "OrthoTrans + NormLin + 线性 CSL/ISL",
+   "insight": "先换个看数据的角度（变换域），再建模；attention 的成功在于归一化混合形式而非动态权重",
+   "links": {
+    "arxiv": "https://arxiv.org/abs/2505.08550",
+    "github": "https://github.com/jackyue1994/OLinear"
+   }
+  },
+  {
+   "id": "freeformer-2025",
+   "title": "FreEformer",
+   "year": 2025,
+   "venue": "IJCAI",
+   "authors": "Yue et al. (PKU)",
+   "stage": "backbone",
+   "era": "era2",
+   "tags": [
+    "transformer",
+    "frequency",
+    "attention"
+   ],
+   "new_cognition": "频域 + 变量 token 的 Transformer；发现频域下 vanilla attention 低秩限制表达，用可学习矩阵增强 + 行 L1 归一化，理论证多样性/梯度流提升，即插即用。",
+   "corrects": "频域建模只能用线性层；vanilla attention 在哪都够用。",
+   "corrected_by": [],
+   "problem": "频域下的变量间依赖建模",
+   "method": "DFT + 频谱变量 token + 增强 attention",
+   "insight": "attention 低秩是该组后续消灭 attention 的起点",
+   "links": {
+    "arxiv": "https://arxiv.org/abs/2501.13989"
+   }
   }
  ]
 }
