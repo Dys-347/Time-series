@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>多变量时间序列预测 · 认知演进史</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#f4f6fa;color:#1f2937;line-height:1.7;padding:24px 16px}
+.wrap{max-width:1100px;margin:0 auto}
+header{background:linear-gradient(135deg,#0f2b4c,#2b6cb0);color:#fff;border-radius:16px;padding:40px 34px;margin-bottom:24px}
+header h1{font-size:27px;margin-bottom:10px}
+header p{opacity:.88;font-size:14px;max-width:760px}
+.meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.meta span{background:rgba(255,255,255,.16);padding:4px 14px;border-radius:20px;font-size:13px}
+section{background:#fff;border-radius:14px;padding:28px;margin-bottom:20px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+h2{font-size:19px;margin-bottom:6px;padding-bottom:8px;border-bottom:2px solid #ebf0f7}
+.sec-sub{font-size:13px;color:#6b7280;margin-bottom:16px}
+.stages{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.stage-card{border:1px solid #e5eaf1;border-radius:12px;padding:16px;cursor:pointer;transition:all .2s;background:#fbfcfe}
+.stage-card:hover{border-color:#2b6cb0;box-shadow:0 4px 14px rgba(43,108,176,.12)}
+.stage-card.active{border-color:#2b6cb0;background:#f0f7ff}
+.stage-card h3{font-size:15px;color:#1e3a5f;margin-bottom:4px}
+.stage-card p{font-size:12.5px;color:#6b7280}
+.stage-card .n{font-size:12px;color:#2b6cb0;font-weight:600;margin-top:6px}
+.chain{border-left:3px solid #2b6cb0;padding:4px 0 4px 18px;margin:14px 0;position:relative}
+.chain .step{margin:10px 0;font-size:14px}
+.chain .step b{color:#1e3a5f}
+.chain .arrow{color:#2b6cb0;font-size:13px;margin:2px 0}
+.chain .why{font-size:12.5px;color:#6b7280}
+.toolbar{display:flex;gap:10px;margin-bottom:6px;flex-wrap:wrap}
+.toolbar input{flex:1;min-width:200px;padding:10px 14px;border:1.5px solid #dbe3ee;border-radius:10px;font-size:14px}
+.toolbar input:focus{outline:none;border-color:#2b6cb0}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.chip{font-size:12.5px;padding:5px 14px;border-radius:18px;border:1.5px solid #dbe3ee;background:#fff;cursor:pointer;color:#4b5563}
+.chip.active{background:#2b6cb0;color:#fff;border-color:#2b6cb0}
+.card{border:1px solid #e5eaf1;border-radius:12px;padding:20px;margin:14px 0}
+.card h3{font-size:16px;color:#1e3a5f;margin-bottom:4px}
+.card h3 a{color:#1e3a5f;text-decoration:none}
+.card h3 a:hover{color:#2b6cb0;text-decoration:underline}
+.card .info{font-size:12.5px;color:#6b7280;margin-bottom:10px}
+.badge{display:inline-block;font-size:11px;border-radius:4px;padding:2px 8px;margin-right:6px}
+.badge.stage{background:#e8f0fb;color:#2b6cb0}
+.badge.venue{background:#eef2f7;color:#4b5563}
+.badge.author{background:#fef3c7;color:#92400e}
+.diff{background:#f0f7ff;border-radius:8px;padding:10px 14px;margin:8px 0;font-size:13.5px}
+.diff.old{background:#fef2f2}
+.diff .k{font-weight:700;font-size:12px;display:block;margin-bottom:2px}
+.diff.new .k{color:#1d4ed8}
+.diff.old .k{color:#b91c1c}
+.pmi{font-size:13px;color:#4b5563;margin-top:8px;border-top:1px dashed #e5eaf1;padding-top:8px}
+.pmi b{color:#374151}
+.links{margin-top:8px;font-size:12.5px}
+.links a{color:#2b6cb0;margin-right:12px}
+footer{text-align:center;color:#9ca3af;font-size:12.5px;padding:20px}
+footer a{color:#2b6cb0}
+.hidden{display:none!important}
+.howto{background:#fbfcfe;border:1px dashed #cbd5e1;border-radius:10px;padding:14px 18px;font-size:13.5px;color:#4b5563}
+.howto code{background:#eef2f7;padding:1px 6px;border-radius:4px;font-size:12.5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<h1>多变量时间序列预测 · 认知演进史</h1>
+<p>一个领域的认知是由一篇篇论文组成的：每篇提出新观点、修正旧观点、完善 pipeline。这里记录每一次"认知修正"——一部用论文写成的思想史，而非论文列表。</p>
+<div class="meta" id="stats"></div>
+</header>
+
+<section>
+<h2>Pipeline 全景</h2>
+<div class="sec-sub">点击阶段卡片，筛选该阶段的论文</div>
+<div class="stages" id="stages"></div>
+</section>
+
+<section>
+<h2>思想链</h2>
+<div class="sec-sub">几条主线的"修正链"：后一篇回答了前一篇留下的问题</div>
+<div id="chains"></div>
+</section>
+
+<section>
+<h2>论文 · 认知 diff</h2>
+<div class="toolbar"><input id="q" type="text" placeholder="🔍 搜索：标题 / 观点 / 方法，如 flow matching、Mamba、channel independence …"></div>
+<div class="chips" id="chips"></div>
+<div id="list"></div>
+</section>
+
+<section>
+<h2>如何贡献</h2>
+<div class="howto">
+读完一篇论文，顺手在 <code>papers.json</code> 里加一条：<code>title / year / venue / stage / new_cognition（它让领域相信了什么）/ corrects（它修正了谁的什么观点）/ problem·method·insight</code>。网页自动渲染，无需构建。完整 schema 见仓库 <code>README.md</code>。
+</div>
+</section>
+
+<footer>维护：Dys-347 · 数据：<a href="papers.json">papers.json</a> · 用 GitHub Pages 托管，Star 随意，PR 欢迎</footer>
+</div>
+<script>
+let DATA=null, activeStage=null;
+const CHAINS=[
+ {name:"范式之争：复杂度 vs 简单", steps:[
+   ["Informer (2021)","ProbSparse attention 让 Transformer 能做长时序"],
+   ["Autoformer (2021)","分解进架构：趋势/季节分开建模"],
+   ["DLinear (2023)","单层线性打平复杂 Transformer——复杂度≠效果，认知地震"],
+   ["PatchTST (2023)","Transformer 回春：之前是输入表征错了，不是架构错了"]],
+  why:"核心争论：时序预测到底需要多复杂的模型？DLinear 把问题从'堆架构'扭回'表征与归纳偏置'。"},
+ {name:"变量关系之争：独立 vs 联合", steps:[
+   ["PatchTST (2023)","channel independence：各变量独立建模更好"],
+   ["iTransformer (2024)","inverted：变量当 token，变量间依赖值得建模"],
+   ["TimeMixer (2024)","多尺度混合：不同尺度不同深度"]],
+  why:"从'要不要联合'到'怎么联合'，争论焦点在变量维度的归纳偏置。"},
+ {name:"生成式预测线：从采样到单步", steps:[
+   ["DeepAR (2017)","预测=输出分布，不只是点估计"],
+   ["TimeGrad / CSDI (2021)","diffusion 做概率预测，代价是数百步采样"],
+   ["TSFlow (2025)","flow matching + GP 先验，prior 设计是关键"],
+   ["vLinear (2026)","监督最终序列 > 监督速度场（+8.6%）"],
+   ["FlowCast (2026)","时序近似确定性映射，单步直达，100x 加速"]],
+  why:"一条清晰的'去间接化'链条：分布→速度场→最终序列→单步直达，每一步都在问'中间环节真的必要吗'。"},
+ {name:"单步思想的跨领域迁移", steps:[
+   ["MeanFlow (2025, 图像)","平均速度场，免蒸馏单步生成"],
+   ["MP1 (2025, 机器人)","单步 FM 跑 6.8ms 实时控制"],
+   ["TwinFlow (2026, 图像)","自对抗 flow，单模型扩展到 20B"],
+   ["FlowCast (2026, 时序)","平均速度思想迁入时序预测"]],
+  why:"图像→机器人→时序：单步生成思想的迁移史。注意 asymmetry：图像侧靠蒸馏，时序侧走免蒸馏。"}
+];
+async function init(){
+  DATA=await (await fetch('papers.json')).json();
+  const papers=DATA.papers, stages=DATA.meta.stages;
+  const years=papers.map(p=>p.year);
+  document.getElementById('stats').innerHTML=
+    `<span>📄 ${papers.length} 篇</span><span>🧩 ${stages.length} 个阶段</span><span>📅 ${Math.min(...years)}–${Math.max(...years)}</span><span>⛓ ${CHAINS.length} 条思想链</span>`;
+  const counts={}; papers.forEach(p=>counts[p.stage]=(counts[p.stage]||0)+1);
+  document.getElementById('stages').innerHTML=stages.map(s=>
+    `<div class="stage-card" data-stage="${s.id}"><h3>${s.name}</h3><p>${s.desc}</p><div class="n">${counts[s.id]||0} 篇论文</div></div>`).join('');
+  document.querySelectorAll('.stage-card').forEach(c=>c.addEventListener('click',()=>{
+    activeStage = activeStage===c.dataset.stage? null : c.dataset.stage;
+    document.querySelectorAll('.stage-card').forEach(x=>x.classList.toggle('active',x.dataset.stage===activeStage));
+    syncChips(); render();
+  }));
+  document.getElementById('chains').innerHTML=CHAINS.map(c=>
+    `<div class="chain"><div class="step"><b>⛓ ${c.name}</b></div>`+
+    c.steps.map((s,i)=>`${i?'<div class="arrow">↓ 修正 / 推进</div>':''}<div class="step"><b>${s[0]}</b> — ${s[1]}</div>`).join('')+
+    `<div class="why">${c.why}</div></div>`).join('');
+  const chips=[["","全部"]].concat(stages.map(s=>[s.id,s.name]));
+  document.getElementById('chips').innerHTML=chips.map(([v,n])=>
+    `<span class="chip${v===''?' active':''}" data-v="${v}">${n}</span>`).join('');
+  document.querySelectorAll('.chip').forEach(ch=>ch.addEventListener('click',()=>{
+    activeStage=ch.dataset.v||null; syncChips(); render();
+  }));
+  document.getElementById('q').addEventListener('input',render);
+  render();
+}
+function syncChips(){
+  document.querySelectorAll('.chip').forEach(ch=>ch.classList.toggle('active',(ch.dataset.v||null)===activeStage));
+  document.querySelectorAll('.stage-card').forEach(x=>x.classList.toggle('active',x.dataset.stage===activeStage));
+}
+function stageName(id){const s=DATA.meta.stages.find(x=>x.id===id);return s?s.name:id;}
+function render(){
+  const q=(document.getElementById('q').value||'').toLowerCase();
+  const box=document.getElementById('list');
+  const items=DATA.papers.filter(p=>
+    (!activeStage||p.stage===activeStage) &&
+    (!q||(p.title+' '+p.new_cognition+' '+p.corrects+' '+p.method+' '+(p.tags||[]).join(' ')).toLowerCase().includes(q)));
+  const groups={};
+  items.forEach(p=>{(groups[p.stage]=groups[p.stage]||[]).push(p);});
+  let html='';
+  DATA.meta.stages.forEach(s=>{
+    const arr=(groups[s.id]||[]).sort((a,b)=>a.year-b.year);
+    if(!arr.length)return;
+    html+=`<h2 style="margin-top:18px">${s.name}<span style="font-size:12px;color:#6b7280;font-weight:400;margin-left:8px">${arr.length} 篇</span></h2>`;
+    arr.forEach(p=>{
+      const link=p.links&&p.links.arxiv?`<a href="${p.links.arxiv}" target="_blank">arXiv</a>`:'';
+      const gh=p.links&&p.links.github?`<a href="${p.links.github}" target="_blank">GitHub</a>`:'';
+      const doi=p.links&&p.links.doi?`<a href="${p.links.doi}" target="_blank">DOI</a>`:'';
+      html+=`<div class="card">
+        <h3>${p.title} ${link?'':''}</h3>
+        <div class="info"><span class="badge stage">${s.name}</span><span class="badge venue">${p.year} · ${p.venue}</span>${p.tags&&p.tags.includes('author-work')?'<span class="badge author">作者工作</span>':''}<span style="margin-left:6px">${p.authors||''}</span></div>
+        <div class="diff new"><span class="k">✦ 新认知</span>${p.new_cognition}</div>
+        <div class="diff old"><span class="k">✧ 修正的旧认知</span>${p.corrects}</div>
+        <div class="pmi"><b>P</b> ${p.problem||'—'} &nbsp;·&nbsp; <b>M</b> ${p.method||'—'} &nbsp;·&nbsp; <b>I</b> ${p.insight||'—'}</div>
+        <div class="links">${link}${gh}${doi}</div>
+      </div>`;
+    });
+  });
+  box.innerHTML=html||'<p style="color:#9ca3af;text-align:center;padding:30px">没有匹配的论文，换个关键词试试。</p>';
+}
+init();
+</script>
+</body>
+</html>

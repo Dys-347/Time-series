@@ -1,0 +1,560 @@
+{
+ "meta": {
+  "description": "记录这个领域每篇重要论文提出了什么新认知、修正了什么旧认知。一部用论文写成的思想史。",
+  "stages": [
+   {
+    "desc": "预测什么：点估计还是分布？怎么形式化预测问题",
+    "id": "problem",
+    "name": "问题定义"
+   },
+   {
+    "desc": "归一化、平稳化、patching：怎么把原始序列喂给模型",
+    "id": "input",
+    "name": "输入处理"
+   },
+   {
+    "desc": "趋势/季节/小波/多尺度：把复杂信号拆开",
+    "id": "decomposition",
+    "name": "分解"
+   },
+   {
+    "desc": "Transformer / RNN / MLP / CNN / Mamba / LLM：用什么架构建模",
+    "id": "backbone",
+    "name": "建模主干"
+   },
+   {
+    "desc": "channel 独立还是联合：多变量之间怎么交互",
+    "id": "variables",
+    "name": "变量间关系"
+   },
+   {
+    "desc": "监督什么：速度场、最终序列、分布、分位数",
+    "id": "loss",
+    "name": "损失函数"
+   },
+   {
+    "desc": "多步还是单步、确定性还是采样：怎么从模型得到预测",
+    "id": "inference",
+    "name": "推理采样"
+   },
+   {
+    "desc": "benchmark 与指标：用什么证明自己",
+    "id": "evaluation",
+    "name": "评估"
+   }
+  ],
+  "title": "多变量时间序列预测 · 认知演进史"
+ },
+ "papers": [
+  {
+   "authors": "Salinas et al.",
+   "corrected_by": [
+    "timegrad-2021"
+   ],
+   "corrects": "预测 = 输出一个未来值（点估计即全部）。",
+   "id": "deepar-2017",
+   "insight": "把预测重新定义为分布估计问题，后续所有概率预测工作的起点",
+   "links": {
+    "arxiv": "https://arxiv.org/abs/1704.04110"
+   },
+   "method": "自回归 RNN，输出分布参数，极大似然训练",
+   "new_cognition": "预测应该输出概率分布而非点估计：自回归 RNN + 参数分布（高斯/负二项），天然给出不确定性。",
+   "problem": "大规模相关时序的概率预测",
+   "stage": "problem",
+   "tags": [
+    "probabilistic",
+    "autoregressive",
+    "classic"
+   ],
+   "title": "DeepAR",
+   "venue": "arXiv",
+   "year": 2017
+  },
+  {
+   "authors": "Oreshkin et al.",
+   "corrected_by": [
+    "dlinear-2023"
+   ],
+   "corrects": "深度时序预测必须用循环或注意力结构。",
+   "id": "nbeats-2020",
+   "insight": "架构极简主义的第一枪：把 inductive bias 做进基函数，而不是做进网络结构",
+   "links": {
+    "arxiv": "https://arxiv.org/abs/1905.10437"
+   },
+   "method": "残差堆叠的全连接块，每块拟合基函数展开的一部分",
+   "new_cognition": "纯 MLP + 基函数展开（趋势/季节基）可以做到高精度且可解释的预测，不需要 RNN/Attention。",
+   "problem": "单变量时序预测的精度与可解释性",
+   "stage": "backbone",
+   "tags": [
+    "mlp",
+    "interpretable",
+    "classic"
+   ],
+   "title": "N-BEATS",
+   "venue": "ICLR",
+   "year": 2020
+  },
+  {
+   "authors": "Zhou et al.",
+   "corrected_by": [
+    "autoformer-2021"
+   ],
+   "corrects": "Transformer 二次复杂度，做不了长时序。",
+   "id": "informer-2021",
+   "insight": "注意力矩阵是稀疏的，大部分 query 的注意力分布接近均匀——可以不算",
+   "links": {
+    "arxiv": "https://arxiv.org/abs/2012.07436"
+   },
+   "method": "ProbSparse attention（只算 top-k 查询）+ 自注意力蒸馏 + 生成式解码",
+   "new_cognition": "ProbSparse 自注意力把 Transformer 做长序列时序的复杂度降到 O(L log L)，长时序预测成为可能。",
+   "problem": "长序列时序预测的效率瓶颈",
+   "stage": "backbone",
+   "tags": [
+    "transformer",
+    "efficiency",
+    "long-term"
+   ],
+   "title": "Informer",
+   "venue": "AAAI",
+   "year": 2021
+  },
+  {
+   "authors": "Wu et al.",
+   "corrected_by": [
+    "fedformer-2022",
+    "dlinear-2023"
+   ],
+   "corrects": "纯 attention 足够，不需要显式分解（Informer 路线）。",
+   "id": "autoformer-2021",
+   "insight": "时序的自相关性是比点相似性更本质的依赖度量",
+   "links": {
+    "arxiv": "https://arxiv.org/abs/2106.13008"
+   },
+   "method": "序列分解块 + Auto-Correlation（用 FFT 找周期，做时延对齐聚合）替代点式 attention",
+   "new_cognition": "把序列分解显式做进架构：趋势用累积、季节用自相关（基于周期的时延聚合），分解不是预处理而是模型的一部分。",
+   "problem": "长时序中的趋势/季节纠缠",
+   "stage": "decomposition",
+   "tags": [
+    "transformer",
+    "decomposition",
+    "autocorrelation"
+   ],
+   "title": "Autoformer",
+   "venue": "NeurIPS",
+   "year": 2021
+  },
+  {
+   "authors": "Zhou et al.",
+   "corrected_by": [],
+   "corrects": "时域建模足够；频域只是特征工程。",
+   "id": "fedformer-2022",
+   "insight": "周期性在频域是稀疏的——只用少量傅里叶模式就能表示",
+   "links": {
+    "arxiv": "https://arxiv.org/abs/2201.12740"
+   },
+   "method": "频率增强块（FEB）+ 频率增强注意力（FEA）+ 专家混合分解（MOEDecomp）",
+   "new_cognition": "频域注意力：傅里叶/小波基下的注意力能捕捉全局周期模式，且保持线性复杂度。",
+   "problem": "全局周期模式的捕捉",
+   "stage": "decomposition",
+   "tags": [
+    "transformer",
+    "frequency",
+    "decomposition"
+   ],
+   "title": "FEDformer",
+   "venue": "ICML",
+   "year": 2022
+  },
+  {
+   "authors": "Liu et al.",
+   "corrected_by": [
+    "revin-2023"
+   ],
+   "corrects": "Transformer 在非平稳序列上不行是因为模型容量不够。",
+   "id": "nonstationary-2022",
+   "insight": "平稳化让模型学到可迁移的模式，非平稳信息以残差形式保留——分开处理",
+   "links": {
+    "arxiv": "https://arxiv.org/abs/2205.14415"
+   },
+   "method": "Series Stationarization + De-stationary Attention（从原始序列学缩放因子）",
+   "new_cognition": "非平稳是 Transformer 失效的主因：先做序列平稳化（减均值除方差），再用 de-stationary attention 把非平稳信息加回来。",
+   "problem": "非平稳序列上的 Transformer 泛化",
+   "stage": "input",
+   "tags": [
+    "transformer",
+    "non-stationary",
+    "normalization"
+   ],
+   "title": "Non-stationary Transformer",
+   "venue": "NeurIPS",
+   "year": 2022
+  },
+  {
+   "authors": "Zeng et al.",
+   "corrected_by": [
+    "patchtst-2023",
+    "itransformer-2024"
+   ],
+   "corrects": "模型越复杂效果越好（Transformer 崇拜）。这是领域最大的一次认知地震。",
+   "id": "dlinear-2023",
+   "insight": "时序预测在很多数据集上近似线性问题；之前是 benchmark 和评估方式放大了复杂模型的优势",
+   "links": {
+    "arxiv": "https://arxiv.org/abs/2205.13504"
+   },
+   "method": "移动平均分解为趋势/季节，各过一个线性层",
+   "new_cognition": "单层线性在多个 benchmark 上打平/超过复杂 Transformer——复杂度≠效果；分解（趋势+季节）+ 线性就够了。",
+   "problem": "Transformer 在时序上是否被高估",
+   "stage": "backbone",
+   "tags": [
+    "linear",
+    "landmark",
+    "decomposition"
+   ],
+   "title": "DLinear",
+   "venue": "AAAI",
+   "year": 2023
+  },
+  {
+   "authors": "Nie et al.",
+   "corrected_by": [
+    "itransformer-2024"
+   ],
+   "corrects": "DLinear 证明 Transformer 已死；多元变量必须联合建模。",
+   "id": "patchtst-2023",
+   "insight": "之前 Transformer 不行，部分原因是输入表征错了（点式 token 无语义），不是架构错了",
+   "links": {
+    "arxiv": "https://arxiv.org/abs/2211.14730"
+   },
+   "method": "序列切 patch 当 token；每个 channel 独立过同一个 Transformer",
+   "new_cognition": "patch 切分（保留局部语义）+ channel independence（每个变量独立建模）：Transformer 回春，超过 DLinear。",
+   "problem": "Transformer 在 DLinear 冲击后的正名",
+   "stage": "input",
+   "tags": [
+    "transformer",
+    "patching",
+    "channel-independence"
+   ],
+   "title": "PatchTST",
+   "venue": "ICLR",
+   "year": 2023
+  },
+  {
+   "authors": "Wu et al.",
+   "corrected_by": [],
+   "corrects": "时序建模必须用序列架构（RNN/Transformer）。",
+   "id": "timesnet-2023",
+   "insight": "周期性是 2D 结构（一维是相位，一维是周期重复），用对的几何视角比堆复杂度重要",
+   "links": {
+    "arxiv": "https://arxiv.org/abs/2210.02186"
+   },
+   "method": "FFT 找 top-k 周期 → reshape 成 2D → Inception CNN → 加权聚合",
+   "new_cognition": "按主导周期把 1D 时序 reshape 成 2D 张量，用 2D CNN 同时捕捉周期内（列）与周期间（行）变化——时序不一定用序列模型。",
+   "problem": "多周期纠缠的建模",
+   "stage": "backbone",
+   "tags": [
+    "cnn",
+    "periodicity",
+    "2d"
+   ],
+   "title": "TimesNet",
+   "venue": "ICLR",
+   "year": 2023
+  },
+  {
+   "authors": "Kim et al.",
+   "corrected_by": [],
+   "corrects": "全局归一化（train 统计量）足够。",
+   "id": "revin-2023",
+   "insight": "分布偏移主要是一阶/二阶统计量的漂移，可逆操作零代价消除",
+   "links": {
+    "arxiv": "https://arxiv.org/abs/2205.02904"
+   },
+   "method": "每个实例独立做 z-score，保存均值方差，输出时 denormalize",
+   "new_cognition": "可逆实例归一化：训练时按实例归一化、推理时用记录的统计量还原——即插即用的分布偏移对抗。",
+   "problem": "训练/测试分布偏移",
+   "stage": "input",
+   "tags": [
+    "normalization",
+    "distribution-shift",
+    "plug-in"
+   ],
+   "title": "RevIN",
+   "venue": "ICLR",
+   "year": 2023
+  },
+  {
+   "id": "itransformer-2024",
+   "title": "iTransformer",
+   "year": 2024,
+   "venue": "ICLR",
+   "authors": "Liu et al.",
+   "stage": "variables",
+   "tags": [
+    "transformer",
+    "variate-token",
+    "multivariate"
+   ],
+   "new_cognition": "Inverted 视角：把每个变量的整条序列当作一个 token，用 attention 建模变量间依赖；时间维用线性/MLP 处理。",
+   "corrects": "PatchTST 的 channel independence 绝对化——变量间关系被完全丢掉是浪费。",
+   "corrected_by": [],
+   "problem": "多元变量间的依赖建模",
+   "method": "变量级 token + Transformer encoder",
+   "insight": "时序建模的瓶颈不在时间维（线性就够），而在变量维",
+   "links": {
+    "arxiv": "https://arxiv.org/abs/2310.06625"
+   }
+  },
+  {
+   "id": "timemixer-2024",
+   "title": "TimeMixer",
+   "year": 2024,
+   "venue": "ICML",
+   "authors": "Wang et al.",
+   "stage": "backbone",
+   "tags": [
+    "mlp",
+    "multiscale",
+    "mixer"
+   ],
+   "new_cognition": "可分解的多尺度混合：不同尺度用不同深度的 Mixer，粗尺度抓趋势、细尺度抓细节。",
+   "corrects": "单尺度混合足够（TSMixer）——尺度本身是信息。",
+   "corrected_by": [],
+   "problem": "多尺度时间模式的统一建模",
+   "method": "下采样多尺度 + Past-Decomposable-Mixing / Future-Multipredictor-Mixing",
+   "insight": "分解思想（DLinear/Autoformer）与 Mixer 架构的结合",
+   "links": {
+    "arxiv": "https://arxiv.org/abs/2405.14616"
+   }
+  },
+  {
+   "id": "timegrad-2021",
+   "title": "TimeGrad",
+   "year": 2021,
+   "venue": "ICML",
+   "authors": "Rasul et al.",
+   "stage": "problem",
+   "tags": [
+    "diffusion",
+    "probabilistic",
+    "autoregressive"
+   ],
+   "new_cognition": "Diffusion 可以做自回归概率预测：每步用 DDPM 建模条件分布，RNN 编码历史。",
+   "corrects": "Diffusion 只能做图像生成。",
+   "corrected_by": [
+    "csdi-2021",
+    "tsflow-2025"
+   ],
+   "problem": "高维相关时序的概率预测",
+   "method": "RNN 条件编码 + DDPM 去噪",
+   "insight": "把图像 diffusion 的成功经验搬到时序，代价是推理慢（数百步）",
+   "links": {
+    "arxiv": "https://arxiv.org/abs/2101.00746"
+   }
+  },
+  {
+   "id": "csdi-2021",
+   "title": "CSDI",
+   "year": 2021,
+   "venue": "NeurIPS",
+   "authors": "Tashiro et al.",
+   "stage": "problem",
+   "tags": [
+    "diffusion",
+    "probabilistic",
+    "imputation"
+   ],
+   "new_cognition": "预测即条件生成：用 score-based diffusion 做插补和预测的统一框架，非自回归一次生成整段未来。",
+   "corrects": "概率预测必须自回归（TimeGrad/DeepAR 路线）。",
+   "corrected_by": [
+    "tsflow-2025"
+   ],
+   "problem": "缺失值插补与概率预测统一",
+   "method": "条件 score-based diffusion + Transformer 骨干",
+   "insight": "非自回归生成避免误差累积，但仍需数百去噪步",
+   "links": {
+    "arxiv": "https://arxiv.org/abs/2107.06277"
+   }
+  },
+  {
+   "id": "timellm-2024",
+   "title": "Time-LLM",
+   "year": 2024,
+   "venue": "ICLR",
+   "authors": "Jin et al.",
+   "stage": "backbone",
+   "tags": [
+    "llm",
+    "reprogramming",
+    "cross-domain"
+   ],
+   "new_cognition": "Reprogramming：把时序 patch 通过可学习映射对齐到 LLM 的词向量空间，冻结 LLM 做预测——LLM 的序列建模能力可迁移。",
+   "corrects": "LLM 只能处理文本；时序需要专用架构。",
+   "corrected_by": [],
+   "problem": "大模型的序列知识能否用于时序",
+   "method": "Patch 重编程 + 冻结 LLM + 输出映射",
+   "insight": "模态对齐 > 从零训练；prompt 思想进入时序",
+   "links": {
+    "arxiv": "https://arxiv.org/abs/2310.01728"
+   }
+  },
+  {
+   "id": "tsflow-2025",
+   "title": "TSFlow",
+   "year": 2025,
+   "venue": "ICLR",
+   "authors": "Kollovieh et al.",
+   "stage": "loss",
+   "tags": [
+    "flow-matching",
+    "probabilistic",
+    "prior"
+   ],
+   "new_cognition": "FM + 高斯过程先验：让 prior 与时序的时序结构对齐（而非标准高斯噪声），+ OT 路径；8 个数据集 6 个 SOTA。",
+   "corrects": "Diffusion 的简单高斯 prior 够用；FM 只属于图像领域。",
+   "corrected_by": [
+    "vlinear-2026",
+    "mercerflow-2026"
+   ],
+   "problem": "时序的概率生成与预测",
+   "method": "条件 FM + GP 先验 + OT 耦合",
+   "insight": "生成质量很大程度上由 prior 决定——prior 设计是 FM 的核心战场",
+   "links": {
+    "arxiv": "https://arxiv.org/abs/2410.03024"
+   }
+  },
+  {
+   "id": "meanflow-2025",
+   "title": "MeanFlow",
+   "year": 2025,
+   "venue": "arXiv",
+   "authors": "Geng et al.",
+   "stage": "inference",
+   "tags": [
+    "flow-matching",
+    "one-step",
+    "image-domain"
+   ],
+   "new_cognition": "学平均速度场（而非瞬时速度）+ JVP 自洽训练，免蒸馏单步生成——单步不需要 teacher。",
+   "corrects": "单步生成必须蒸馏（Consistency Models/Progressive Distillation 路线）。",
+   "corrected_by": [
+    "flowcast-2026"
+   ],
+   "problem": "生成模型的单步推理",
+   "method": "平均速度 u(z_t,r,t) + JVP 自洽损失",
+   "insight": "领域：图像生成；但思想（平均速度）是 FlowCast 单步的直接来源",
+   "links": {
+    "arxiv": "https://arxiv.org/abs/2505.13447"
+   }
+  },
+  {
+   "id": "vlinear-2026",
+   "title": "vLinear",
+   "year": 2026,
+   "venue": "arXiv",
+   "authors": "Yue et al. (PKU)",
+   "stage": "loss",
+   "tags": [
+    "flow-matching",
+    "loss-design",
+    "theory"
+   ],
+   "new_cognition": "监督最终序列 > 监督速度场（+8.6%）；horizon-weighted MAE 在一阶 Markov+Laplace 假设下是 MLE 最优（Theorem 2）。",
+   "corrects": "FM 必须拟合速度场（Lipman 原始范式照搬）。",
+   "corrected_by": [
+    "flowcast-2026"
+   ],
+   "problem": "FM 目标函数对时序是否最优",
+   "method": "Final-series Loss + path/horizon 加权；vecTrans rank-1 变量建模",
+   "insight": "损失设计比架构更重要：同样的 FM，换监督目标提升 8.6%",
+   "links": {
+    "arxiv": "https://arxiv.org/abs/2601.13768"
+   }
+  },
+  {
+   "id": "flowcast-2026",
+   "title": "FlowCast",
+   "year": 2026,
+   "venue": "作者工作（投稿中）",
+   "authors": "（本仓库维护者）",
+   "stage": "inference",
+   "tags": [
+    "flow-matching",
+    "one-step",
+    "author-work"
+   ],
+   "new_cognition": "时序预测是近似确定性映射，多步 ODE 积分是图像范式的照搬——平均速度场单步直达，推理加速约 100 倍，精度打平 SOTA。",
+   "corrects": "vLinear/图像范式：必须多步积分才能保证质量。",
+   "corrected_by": [],
+   "problem": "FM 时序预测的推理效率",
+   "method": "Direct Forecast Field + Adaptive Weighted Loss + Temporal Interpolation Consistency",
+   "insight": "vLinear 逻辑的终点：既然只关心终点，为什么还绕路？",
+   "links": {}
+  },
+  {
+   "id": "sd3-2024",
+   "title": "Stable Diffusion 3",
+   "year": 2024,
+   "venue": "ICML",
+   "authors": "Esser et al.",
+   "stage": "loss",
+   "tags": [
+    "flow-matching",
+    "image-domain",
+    "landmark"
+   ],
+   "new_cognition": "Rectified Flow 替代 DDPM 的 ε-prediction 成为大模型默认训练目标；logit-normal t 采样把训练信号集中在有效区。",
+   "corrects": "DDPM 噪声预测是生成模型的标准训练范式。",
+   "corrected_by": [],
+   "problem": "文生图的质量与训练效率",
+   "method": "Rectified Flow Matching + MM-DiT",
+   "insight": "领域：图像；但它是 FM 出圈的标志事件——时序 FM 站在它的肩上",
+   "links": {
+    "arxiv": "https://arxiv.org/abs/2403.03206"
+   }
+  },
+  {
+   "id": "twinflow-2026",
+   "title": "TwinFlow",
+   "year": 2026,
+   "venue": "ICLR",
+   "authors": "Akane et al.",
+   "stage": "inference",
+   "tags": [
+    "flow-matching",
+    "one-step",
+    "image-domain"
+   ],
+   "new_cognition": "自对抗 flow：时间轴扩到 [-1,1]，负分支生成假数据，模型自己 rectify——单模型、无 teacher，扩展到 20B 全参数训练。",
+   "corrects": "单步蒸馏必须维护 teacher/student/判别器三个模型（DMD 路线），扩不上去。",
+   "corrected_by": [],
+   "problem": "大规模模型的单步生成",
+   "method": "自对抗速度场差 Δv 最小化",
+   "insight": "领域：图像；单步技术的另一条路（自对抗 vs 平均速度），可迁移",
+   "links": {
+    "github": "https://github.com/AkaneTendo25/TwinFlow"
+   }
+  },
+  {
+   "id": "mercerflow-2026",
+   "title": "MercerFlow",
+   "year": 2026,
+   "venue": "arXiv",
+   "authors": "—",
+   "stage": "loss",
+   "tags": [
+    "flow-matching",
+    "kernel",
+    "probabilistic"
+   ],
+   "new_cognition": "Mercer 核嵌入的 FM：用核方法构造更灵活的概率路径，把核技巧带进 flow matching。",
+   "corrects": "FM 的概率路径只能用高斯/OT 构造（TSFlow 路线）。",
+   "corrected_by": [],
+   "problem": "FM 概率路径的灵活性",
+   "method": "Mercer 核嵌入 + 条件 FM",
+   "insight": "核方法与生成建模的结合点",
+   "links": {
+    "arxiv": "https://arxiv.org/abs/2610.06039"
+   }
+  }
+ ]
+}
