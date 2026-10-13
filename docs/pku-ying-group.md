@@ -63,22 +63,22 @@
 
 > Transformer 的 attention 又贵又低秩，不如换成便宜的线性部件；与其在时域硬刚纠缠的依赖，不如先换到解耦的变换域；与其监督中间量，不如直接监督最终结果。
 
-## 4. 对我们的启示
+## 4. 评价：可借鉴与可质疑
 
-- **站位**：vLinear 是"改考试"（换监督目标），FlowCast 是"省考场"（单步直达）——同一条"去间接化"思想线的上下游。写 related work 时这是天然的承接句。
-- **可偷的**：
-  - 即插即用包装：AWL 也可以包装成 plug-and-play loss（"drop-in replacement for MSE/MAE in FM training"），这是该组验证过的有效叙事。
-  - OrthoTrans 思想：数据自适应的解耦变换，对时序输入处理有启发（方向 1 的跨实体检索也许用得上）。
-- **可质疑的**：
-  - 定理假设强（Laplace、一阶 Markov）——rebuttal 级别不要拿定理当挡箭牌。
-  - OrthoTrans 对相关矩阵做特征分解，大规模数据/在线场景的代价论文着墨不多。
-- **竞争关系**：该组也在往"目标函数"走，下一步很可能碰**概率预测**（单步概率是空白）。方向 3 要抢时间。
+- **可借鉴**：
+  - 即插即用的叙事：每个模块都能单独插进现有模型，降低了别人试用的门槛，是放大影响力的有效写法。
+  - OrthoTrans 的思想：数据自适应的解耦变换，对输入处理有普遍启发。
+- **可质疑**：
+  - 定理假设偏强（Laplace、一阶 Markov），定理更多是解释性的，不宜当作方法有效的主要证据。
+  - OrthoTrans 要对相关矩阵做特征分解，大规模数据和在线场景下的代价，论文着墨不多。
+  - 可学习混合矩阵的形状与变量数绑定（见 5.5 第 2 条），"即插即用"在变量数变化时需要重新初始化。
+- **走向判断**：该组的重心正从架构转向目标函数，下一步可能进入概率预测。这是推测，需要后续论文验证。
 
-## 6. 代码实证：HLinear 的实现细节（2026-10-13 读码）
+## 5. 代码实证：HLinear 的实现细节（2026-10-13 读码）
 
 > 代码：github.com/1004qiong/hlinear，`models/HLinear.py`（242 行）+ `exp/exp_main.py`。以下均为读码确认的事实。
 
-### 6.1 NormLin 复用实锤
+### 5.1 NormLin 复用实锤
 
 `LinearEncoder_Multihead` 就是 OLinear 的 NormLin，一字不差：
 ```python
@@ -87,7 +87,7 @@ A = F.normalize(A, p=1, dim=-1)   # 行归一
 ```
 该组**模块复用是工程习惯**：NormLin（OLinear）→ HLinear 的通道混合器 → vecTrans（vLinear）是它的 rank-1 激进版。
 
-### 6.2 训练损失：vLinear Theorem 2 的工程实现版
+### 5.2 训练损失：vLinear Theorem 2 的工程实现版
 
 实际使用的不是 MSE，而是 `HeteroLaplace_loss`（`WeightedL1Loss` 被注释掉了）：
 ```python
@@ -98,35 +98,28 @@ loss = |e| / b + log(b)       # Laplace 负对数似然
 - `sigma_c` 用 GT 的 MAD 初始化（`b_init = MAD/ln2`，Laplace 分布下 MAD = b·ln2，统计上是 principled 的）。
 - **连接点**：岳文振是 vLinear 一作 + HLinear 三作——Laplace 思想是同一个人带过来的，不是巧合。
 
-### 6.3 "Hilbert 引导"的真实形态：加法注入 + 全局门
+### 5.3 "Hilbert 引导"的真实形态：加法注入 + 全局门
 
 - 引导方式是**加法**：`routed_embed = x_embed + sigmoid(query_alpha) * osc_prior`，不是注意力调制。"Guided"略有包装成分，实质是"Hilbert-augmented"。
 - 门控存在但粗糙：`query_alpha` 初始化 -4.0（sigmoid≈0.018），先验初始几乎关闭、靠学习打开——设计是聪明的；但它是**全局标量**，不是 per-variable/per-sample 的。
 - 另有一个 per-channel 的残差门 `rel_gate`，调制范围仅 [0.9, 1.1]，作用温和。
 
-### 6.4 工程亮点（扎实的部分）
+### 5.4 工程亮点（扎实的部分）
 
 - 相位处理小心：cos/sin 双通道编码（避免相位 wrap 不连续）、瞬时频率用 `atan2(sin, cos)` 正确处理环绕、用 log amplitude 而非原始振幅。
 - `HilbertSummary` 用 mean/std/last/slope 四个统计量 → MLP → 64 维 guide，简单有效。
 
-### 6.5 诚实的局限（读码确认）
+### 5.5 诚实的局限（读码确认）
 
 1. **Hilbert 直接作用于原始序列**，没有先做 EMD/VMD 分解。对多分量信号，瞬时频率的物理意义存疑（Bedrosian 定理条件不满足）。
 2. **`feature_num=21` 硬编码**（Weather 数据集的变量数）：可学习混合矩阵的形状天然 dataset-specific，换数据集要改。所谓"即插即用"在变量数变化时需要重新初始化——这是 NormLin/vecTrans 类方法的固有代价。
-3. **仍是点预测**：模型只输出均值，Laplace 的 scale 是 loss 内部参数，没有输出给用户。所以"转概率预测"依然成立，而且比预想的更近：**把 HeteroLaplace_loss 里学的 scale 接出来，就是真正的概率预测**（预测区间几乎是现成的）。
+3. **仍是点预测**：模型只输出均值，Laplace 的 scale 是 loss 内部参数，没有输出给用户。
 4. `HilbertSummary` 里 `nn.Dropout(0.5)` 写死，没用传入的 dropout 参数——小瑕疵。
 
-### 6.6 对"HLinear 后续怎么改进"的修正（读码后）
-
-之前给的 8 个方向，读码后调整优先级：
-- **⑦换损失 → 已部分实现**：它已经在用 Laplace NLL，比 MSE 强。但可以再进一步：把 per-sample 的 scale 也输出（现在只有 per-channel 全局 scale），做真正的异方差概率预测。
-- **②门控 → 已有雏形**：query_alpha 全局门 + rel_gate per-channel 门。改进空间是做成 per-sample 自适应门。
-- **①先分解再 Hilbert、④显式相位同步、⑤多尺度、⑥转概率预测**：依然有效，其中⑥现在是最顺手的（scale 已经在学了，接出来就行）。
-
-## 7. 跟踪清单
+## 6. 跟踪清单
 
 - [ ] vLinear 录用状态（arXiv:2601.13768，目前仅 v1、代码匿名）
 - [ ] HLinear 录用状态（2026 投稿中，代码已公开：github.com/1004qiong/hlinear）
 - [ ] "振荡态/Hilbert"是否会成为该组下一条主线（AOSNET 是独立验证信号）
-- [ ] 该组下一步是否进入概率预测 / 单步方向
+- [ ] 该组下一步是否进入概率预测
 - [ ] FreEformer 增强 attention 的后续引用情况

@@ -5,42 +5,42 @@
    {
     "id": "problem",
     "name": "问题定义",
-    "desc": "当前共识：点预测与概率预测两条线并存——前者拼 MSE/MAE，后者拼 CRPS/校准。概率预测是生成式方法（diffusion/FM）的主场；点预测的精度提升已接近平台期。"
+    "desc": "当前格局：点预测（拼 MSE/MAE）与概率预测（拼 CRPS/校准）两条线并存；diffusion/FM 等生成式方法是概率预测的主要路线之一。"
    },
    {
     "id": "input",
     "name": "输入处理",
-    "desc": "当前共识：怎么喂数据一度比用什么模型更重要。分布偏移用 RevIN、非平稳用平稳化+de-stationary、局部语义用 patching——这是 2021–2023 年最密集的战场，如今已成标配。"
+    "desc": "较明确的共识：输入处理对效果影响很大。实例归一化（RevIN）、平稳化（Non-stationary Transformer）、patching（PatchTST）在 2022–2023 年密集出现，如今已是常用配置。"
    },
    {
     "id": "decomposition",
     "name": "分解",
-    "desc": "当前共识：趋势/季节分解从预处理变成了架构的一部分（Autoformer/FEDformer/DLinear）；但 PatchTST/iTransformer 证明不显式分解也能打——“分解是否必要”仍是开放争论。"
+    "desc": "趋势/季节分解从预处理进入了架构（Autoformer/FEDformer/DLinear）；但 PatchTST/iTransformer 不显式分解也有竞争力——“分解是否必要”仍是开放问题。"
    },
    {
     "id": "backbone",
     "name": "建模主干",
-    "desc": "当前共识（DLinear 之后）：归纳偏置 > 模型复杂度。Transformer（变量级）、MLP-Mixer（多尺度）、CNN（周期 2D 化）、线性、Mamba、LLM 六条路线并存，没有银弹。"
+    "desc": "DLinear 之后较多工作认同：归纳偏置比模型复杂度更关键。Transformer、MLP/Mixer、CNN（周期 2D 化）、线性、LLM 等路线并存，没有公认的最优架构。"
    },
    {
     "id": "variables",
     "name": "变量间关系",
-    "desc": "当前共识：从 PatchTST 的 channel independence 到 iTransformer 的变量级 attention，收敛到“变量依赖值得建模，但要轻量”（vecTrans rank-1 即插即用）。"
+    "desc": "两种做法并存：PatchTST 的 channel independence 与 iTransformer 的变量级 attention。轻量变量混合（如 vLinear 的 vecTrans）是新近尝试，尚待更多独立验证。"
    },
    {
     "id": "loss",
     "name": "损失函数",
-    "desc": "当前共识：vLinear 证明监督最终序列 > 监督速度场（+8.6%，有 MLE 理论背书）；概率预测转向 CRPS/分位数损失。损失设计是 2025–2026 的新战场。"
+    "desc": "较明确：概率预测常用 CRPS/分位数/NLL 类目标。单篇主张（预印本）：vLinear 报告监督最终序列优于监督速度场（+8.6%）。损失设计是 2025–2026 的活跃方向。"
    },
    {
     "id": "inference",
     "name": "推理采样",
-    "desc": "当前共识：图像范式的多步采样正在被抛弃——时序是近似确定性映射，单步直达（FlowCast）快约 100 倍且精度不丢。单步概率预测是下一个空白。"
+    "desc": "公认痛点：扩散/FM 时序方法的多步采样推理慢（TimeGrad/CSDI 需数百步）。图像侧已出现免蒸馏的少步/单步方法（MeanFlow、TwinFlow），向时序的迁移仍处早期。"
    },
    {
     "id": "evaluation",
     "name": "评估",
-    "desc": "当前共识：ETT/电力/交通/天气/汇率是事实标准 benchmark，但刷榜边际收益递减；概率、冷启动、跨实体等新方向的评估体系还没建立。"
+    "desc": "ETT/电力/交通/天气/汇率是事实标准 benchmark，刷榜的边际收益在下降；概率、冷启动、跨实体等方向的评估体系尚未成熟。"
    }
   ],
   "title": "多变量时间序列预测 · 认知演进史",
@@ -54,26 +54,27 @@
    },
    {
     "id": "era1",
-    "name": "时代一 · 输入处理",
+    "name": "主线一 · 输入处理",
     "years": "2021–2023",
     "color": "#b45309",
-    "desc": "先把数据喂对：分布偏移、非平稳、分解、patching。DLinear 为这个时代收尾——用最简单的分解+线性，终结了 Transformer 内卷。"
+    "desc": "先把数据喂对：分布偏移、非平稳、分解、patching。DLinear 用分解+线性对 Transformer 路线提出了强质疑。"
    },
    {
     "id": "era2",
-    "name": "时代二 · 架构",
+    "name": "主线二 · 架构",
     "years": "2021–2025",
     "color": "#2b6cb0",
     "desc": "换更好的模型：高效 attention、2D 周期、MLP 混合、变量级建模、LLM。DLinear 之后共识：归纳偏置 > 模型复杂度。"
    },
    {
     "id": "era3",
-    "name": "时代三 · 目标与推理",
+    "name": "主线三 · 目标与推理",
     "years": "2024–",
     "color": "#7c3aed",
-    "desc": "监督什么、怎么推理：vLinear 扭监督目标，FlowCast 扭推理步数。单步概率预测是下一个空白。"
+    "desc": "监督什么、怎么推理：TSFlow 改先验，vLinear 改监督目标，图像侧的单步方法（MeanFlow、TwinFlow）推动少步推理。"
    }
-  ]
+  ],
+  "era_note": "主线是并行的主题，不是严格先后的时代，年份区间会重叠。"
  },
  "papers": [
   {
@@ -97,7 +98,7 @@
     "classic"
    ],
    "title": "DeepAR",
-   "venue": "arXiv",
+   "venue": "IJF 2020（arXiv 2017）",
    "year": 2017,
    "era": "foundation"
   },
@@ -106,7 +107,7 @@
    "corrected_by": [
     "dlinear-2023"
    ],
-   "corrects": "深度时序预测必须用循环或注意力结构。",
+   "corrects": "此前 M4 等竞赛的强方法多为统计模型或统计+深度混合（如 ES-RNN）；N-BEATS 表明纯深度模型也能胜出。",
    "id": "nbeats-2020",
    "insight": "架构极简主义的第一枪：把 inductive bias 做进基函数，而不是做进网络结构",
    "links": {
@@ -131,7 +132,7 @@
    "corrected_by": [
     "autoformer-2021"
    ],
-   "corrects": "Transformer 二次复杂度，做不了长时序。",
+   "corrects": "原始 Transformer 的 O(L²) 复杂度和逐步解码，让长序列预测在计算上难以承受。",
    "id": "informer-2021",
    "insight": "注意力矩阵是稀疏的，大部分 query 的注意力分布接近均匀——可以不算",
    "links": {
@@ -157,7 +158,7 @@
     "fedformer-2022",
     "dlinear-2023"
    ],
-   "corrects": "纯 attention 足够，不需要显式分解（Informer 路线）。",
+   "corrects": "Informer 等在点级别做稀疏 attention；Autoformer 认为长序列中点级依赖不可靠，应在周期/子序列级别聚合，并把分解做进架构。",
    "id": "autoformer-2021",
    "insight": "时序的自相关性是比点相似性更本质的依赖度量",
    "links": {
@@ -180,7 +181,7 @@
   {
    "authors": "Zhou et al.",
    "corrected_by": [],
-   "corrects": "时域建模足够；频域只是特征工程。",
+   "corrects": "Autoformer 的时域分解+自相关难以刻画序列的全局特性；FEDformer 认为在频域少量模式上建模更有效。",
    "id": "fedformer-2022",
    "insight": "周期性在频域是稀疏的——只用少量傅里叶模式就能表示",
    "links": {
@@ -202,10 +203,8 @@
   },
   {
    "authors": "Liu et al.",
-   "corrected_by": [
-    "revin-2023"
-   ],
-   "corrects": "Transformer 在非平稳序列上不行是因为模型容量不够。",
+   "corrected_by": [],
+   "corrects": "只做平稳化（实例归一化）就够了——该文指出“过度平稳化”会抹掉对预测有用的非平稳信息，需要在 attention 中补回。",
    "id": "nonstationary-2022",
    "insight": "平稳化让模型学到可迁移的模式，非平稳信息以残差形式保留——分开处理",
    "links": {
@@ -231,14 +230,14 @@
     "patchtst-2023",
     "itransformer-2024"
    ],
-   "corrects": "模型越复杂效果越好（Transformer 崇拜）。这是领域最大的一次认知地震。",
+   "corrects": "Informer/Autoformer/FEDformer 等认为长时序预测的提升来自 attention 建模能力；DLinear 用一层线性打平或超过它们，质疑了这一点。",
    "id": "dlinear-2023",
    "insight": "时序预测在很多数据集上近似线性问题；之前是 benchmark 和评估方式放大了复杂模型的优势",
    "links": {
     "arxiv": "https://arxiv.org/abs/2205.13504"
    },
    "method": "移动平均分解为趋势/季节，各过一个线性层",
-   "new_cognition": "单层线性在多个 benchmark 上打平/超过复杂 Transformer——复杂度≠效果；分解（趋势+季节）+ 线性就够了。",
+   "new_cognition": "单层线性在多个 benchmark 上打平/超过复杂 Transformer：复杂度≠效果；分解（趋势+季节）+ 线性在这些 benchmark 上已很有竞争力。",
    "problem": "Transformer 在时序上是否被高估",
    "stage": "backbone",
    "tags": [
@@ -256,7 +255,7 @@
    "corrected_by": [
     "itransformer-2024"
    ],
-   "corrects": "DLinear 证明 Transformer 已死；多元变量必须联合建模。",
+   "corrects": "回应 DLinear 对 Transformer 有效性的质疑：PatchTST 认为问题在点级 token 与通道混合的输入表征，而不在 Transformer 本身。",
    "id": "patchtst-2023",
    "insight": "之前 Transformer 不行，部分原因是输入表征错了（点式 token 无语义），不是架构错了",
    "links": {
@@ -279,7 +278,7 @@
   {
    "authors": "Wu et al.",
    "corrected_by": [],
-   "corrects": "时序建模必须用序列架构（RNN/Transformer）。",
+   "corrects": "此前方法直接在 1D 序列上建模时间变化；TimesNet 认为多周期下的周期内/周期间变化难以在 1D 上同时表达。",
    "id": "timesnet-2023",
    "insight": "周期性是 2D 结构（一维是相位，一维是周期重复），用对的几何视角比堆复杂度重要",
    "links": {
@@ -301,12 +300,14 @@
   },
   {
    "authors": "Kim et al.",
-   "corrected_by": [],
-   "corrects": "全局归一化（train 统计量）足够。",
-   "id": "revin-2023",
+   "corrected_by": [
+    "nonstationary-2022"
+   ],
+   "corrects": "用训练集统计量做全局归一化，无法应对实例间、训练/测试间统计量的漂移。",
+   "id": "revin-2022",
    "insight": "分布偏移主要是一阶/二阶统计量的漂移，可逆操作零代价消除",
    "links": {
-    "arxiv": "https://arxiv.org/abs/2205.02904"
+    "github": "https://github.com/ts-kim/RevIN"
    },
    "method": "每个实例独立做 z-score，保存均值方差，输出时 denormalize",
    "new_cognition": "可逆实例归一化：训练时按实例归一化、推理时用记录的统计量还原——即插即用的分布偏移对抗。",
@@ -319,7 +320,7 @@
    ],
    "title": "RevIN",
    "venue": "ICLR",
-   "year": 2023,
+   "year": 2022,
    "era": "era1"
   },
   {
@@ -335,7 +336,7 @@
     "multivariate"
    ],
    "new_cognition": "Inverted 视角：把每个变量的整条序列当作一个 token，用 attention 建模变量间依赖；时间维用线性/MLP 处理。",
-   "corrects": "PatchTST 的 channel independence 绝对化——变量间关系被完全丢掉是浪费。",
+   "corrects": "此前 Transformer 预测器把同一时刻的多个变量嵌成一个时间 token；iTransformer 认为这混合了含义不同的变量，应把每个变量的整条序列当 token。",
    "corrected_by": [],
    "problem": "多元变量间的依赖建模",
    "method": "变量级 token + Transformer encoder",
@@ -358,7 +359,7 @@
     "mixer"
    ],
    "new_cognition": "可分解的多尺度混合：不同尺度用不同深度的 Mixer，粗尺度抓趋势、细尺度抓细节。",
-   "corrects": "单尺度混合足够（TSMixer）——尺度本身是信息。",
+   "corrects": "TSMixer 等在单一尺度上做 MLP 混合；TimeMixer 认为不同采样尺度呈现不同模式，应分尺度分解后再混合。",
    "corrected_by": [],
    "problem": "多尺度时间模式的统一建模",
    "method": "下采样多尺度 + Past-Decomposable-Mixing / Future-Multipredictor-Mixing",
@@ -381,7 +382,7 @@
     "autoregressive"
    ],
    "new_cognition": "Diffusion 可以做自回归概率预测：每步用 DDPM 建模条件分布，RNN 编码历史。",
-   "corrects": "Diffusion 只能做图像生成。",
+   "corrects": "此前概率预测多用参数化分布（如 DeepAR 的高斯/负二项）或 normalizing flow，难以刻画高维复杂的联合分布；TimeGrad 用扩散模型建模条件分布。",
    "corrected_by": [
     "csdi-2021",
     "tsflow-2025"
@@ -390,7 +391,7 @@
    "method": "RNN 条件编码 + DDPM 去噪",
    "insight": "把图像 diffusion 的成功经验搬到时序，代价是推理慢（数百步）",
    "links": {
-    "arxiv": "https://arxiv.org/abs/2101.00746"
+    "arxiv": "https://arxiv.org/abs/2101.12072"
    },
    "era": "foundation"
   },
@@ -407,7 +408,7 @@
     "imputation"
    ],
    "new_cognition": "预测即条件生成：用 score-based diffusion 做插补和预测的统一框架，非自回归一次生成整段未来。",
-   "corrects": "概率预测必须自回归（TimeGrad/DeepAR 路线）。",
+   "corrects": "TimeGrad 式自回归扩散逐步生成；CSDI 用非自回归的条件 score 模型一次生成整段（主要面向插补，也可用于预测）。",
    "corrected_by": [
     "tsflow-2025"
    ],
@@ -415,7 +416,7 @@
    "method": "条件 score-based diffusion + Transformer 骨干",
    "insight": "非自回归生成避免误差累积，但仍需数百去噪步",
    "links": {
-    "arxiv": "https://arxiv.org/abs/2107.06277"
+    "arxiv": "https://arxiv.org/abs/2107.03502"
    },
    "era": "foundation"
   },
@@ -432,7 +433,7 @@
     "cross-domain"
    ],
    "new_cognition": "Reprogramming：把时序 patch 通过可学习映射对齐到 LLM 的词向量空间，冻结 LLM 做预测——LLM 的序列建模能力可迁移。",
-   "corrects": "LLM 只能处理文本；时序需要专用架构。",
+   "corrects": "此前时序模型针对任务/数据集从头训练；Time-LLM 认为冻结的 LLM 经重编程后可迁移到时序预测（这一点后续存在争议，需看独立复现）。",
    "corrected_by": [],
    "problem": "大模型的序列知识能否用于时序",
    "method": "Patch 重编程 + 冻结 LLM + 输出映射",
@@ -455,7 +456,7 @@
     "prior"
    ],
    "new_cognition": "FM + 高斯过程先验：让 prior 与时序的时序结构对齐（而非标准高斯噪声），+ OT 路径；8 个数据集 6 个 SOTA。",
-   "corrects": "Diffusion 的简单高斯 prior 够用；FM 只属于图像领域。",
+   "corrects": "此前时序扩散/FM 多以标准高斯为先验；TSFlow 认为与数据时间结构匹配的 GP 先验更好。",
    "corrected_by": [
     "vlinear-2026",
     "mercerflow-2026"
@@ -482,12 +483,10 @@
    ],
    "new_cognition": "学平均速度场（而非瞬时速度）+ JVP 自洽训练，免蒸馏单步生成——单步不需要 teacher。",
    "corrects": "单步生成必须蒸馏（Consistency Models/Progressive Distillation 路线）。",
-   "corrected_by": [
-    "flowcast-2026"
-   ],
+   "corrected_by": [],
    "problem": "生成模型的单步推理",
    "method": "平均速度 u(z_t,r,t) + JVP 自洽损失",
-   "insight": "领域：图像生成；但思想（平均速度）是 FlowCast 单步的直接来源",
+   "insight": "领域：图像生成；平均速度场思想可能迁移到时序的少步/单步推理",
    "links": {
     "arxiv": "https://arxiv.org/abs/2505.13447"
    },
@@ -507,36 +506,13 @@
    ],
    "new_cognition": "监督最终序列 > 监督速度场（+8.6%）；horizon-weighted MAE 在一阶 Markov+Laplace 假设下是 MLE 最优（Theorem 2）。",
    "corrects": "FM 必须拟合速度场（Lipman 原始范式照搬）。",
-   "corrected_by": [
-    "flowcast-2026"
-   ],
+   "corrected_by": [],
    "problem": "FM 目标函数对时序是否最优",
    "method": "Final-series Loss + path/horizon 加权；vecTrans rank-1 变量建模",
    "insight": "损失设计比架构更重要：同样的 FM，换监督目标提升 8.6%",
    "links": {
     "arxiv": "https://arxiv.org/abs/2601.13768"
    },
-   "era": "era3"
-  },
-  {
-   "id": "flowcast-2026",
-   "title": "FlowCast",
-   "year": 2026,
-   "venue": "作者工作（投稿中）",
-   "authors": "（本仓库维护者）",
-   "stage": "inference",
-   "tags": [
-    "flow-matching",
-    "one-step",
-    "author-work"
-   ],
-   "new_cognition": "时序预测是近似确定性映射，多步 ODE 积分是图像范式的照搬——平均速度场单步直达，推理加速约 100 倍，精度打平 SOTA。",
-   "corrects": "vLinear/图像范式：必须多步积分才能保证质量。",
-   "corrected_by": [],
-   "problem": "FM 时序预测的推理效率",
-   "method": "Direct Forecast Field + Adaptive Weighted Loss + Temporal Interpolation Consistency",
-   "insight": "vLinear 逻辑的终点：既然只关心终点，为什么还绕路？",
-   "links": {},
    "era": "era3"
   },
   {
@@ -552,7 +528,7 @@
     "landmark"
    ],
    "new_cognition": "Rectified Flow 替代 DDPM 的 ε-prediction 成为大模型默认训练目标；logit-normal t 采样把训练信号集中在有效区。",
-   "corrects": "DDPM 噪声预测是生成模型的标准训练范式。",
+   "corrects": "DDPM 的 ε-prediction 是默认训练目标；SD3 的大规模实验表明 rectified flow + logit-normal 时间采样更好。",
    "corrected_by": [],
    "problem": "文生图的质量与训练效率",
    "method": "Rectified Flow Matching + MM-DiT",
@@ -622,7 +598,7 @@
     "attention-free"
    ],
    "new_cognition": "数据自适应正交变换 OrthoTrans：对时间 Pearson 相关矩阵做特征分解，得到解耦的变换域；NormLin（正数+行归一的线性层）模仿 attention 形式，效果超 attention、FLOPs 减半。",
-   "corrects": "变换域必须用固定基（傅里叶/小波）；attention 不可替代。",
+   "corrects": "变换域方法多用固定基（傅里叶/小波），无法利用数据集特有的时间相关结构；同时认为 attention 的动态权重并非必需（NormLin）。",
    "corrected_by": [
     "vlinear-2026"
    ],
@@ -648,7 +624,7 @@
     "attention"
    ],
    "new_cognition": "频域 + 变量 token 的 Transformer；发现频域下 vanilla attention 低秩限制表达，用可学习矩阵增强 + 行 L1 归一化，理论证多样性/梯度流提升，即插即用。",
-   "corrects": "频域建模只能用线性层；vanilla attention 在哪都够用。",
+   "corrects": "频域方法多用线性/MLP 处理频谱；FreEformer 发现频域中 vanilla attention 呈低秩，限制表达，并提出增强。",
    "corrected_by": [],
    "problem": "频域下的变量间依赖建模",
    "method": "DFT + 频谱变量 token + 增强 attention",
@@ -662,7 +638,7 @@
    "title": "HLinear",
    "year": 2026,
    "venue": "投稿中",
-   "authors": "Li, Ziqiong et al.（岳文振合作）",
+   "authors": "Li, Ziqiong et al.（岳文振为合作者）",
    "stage": "input",
    "era": "era3",
    "tags": [
@@ -672,7 +648,7 @@
     "under-review"
    ],
    "new_cognition": "Hilbert 变换提取振荡态先验（包络+相位）：从“数值”到“振荡态”；Hilbert 引导的通道编码做振荡感知的变量间交互，保持轻量。",
-   "corrects": "变换域只有傅里叶/正交基可选；变量交互不需要振荡先验。",
+   "corrects": "此前变换域方法主要利用幅值/频谱，不显式使用瞬时振荡态（包络、相位）。",
    "corrected_by": [],
    "problem": "非平稳振荡动态的建模",
    "method": "Hilbert 变换 + 振荡先验提取 OPE + Hilbert 引导通道编码 HGCE",

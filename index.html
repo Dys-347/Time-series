@@ -86,14 +86,14 @@ footer a{color:#2b6cb0}
 <h2>课题组深挖</h2>
 <div class="sec-sub">一个组连续几篇论文背后的统一思路</div>
 <div class="howto">
-📄 <a href="https://github.com/Dys-347/Time-series/blob/main/docs/pku-ying-group.md" target="_blank">北大应翔华组：从 OLinear 到 vLinear 的思想线</a> —— 五条思想线（attention 低秩→扔 attention、线性化一切、数据自适应变换域、从架构转向损失、方法论签名）、统一命题、对我们的启示与跟踪清单。
+📄 <a href="https://github.com/Dys-347/Time-series/blob/main/docs/pku-ying-group.md" target="_blank">北大应翔华组：从 OLinear 到 vLinear 的思想线</a> —— 五条思想线（attention 低秩→扔 attention、线性化一切、数据自适应变换域、从架构转向损失、方法论签名）、统一命题、代码实证与跟踪清单。
 </div>
 </section>
 
 <section>
 <h2>如何贡献</h2>
 <div class="howto">
-读完一篇论文，顺手在 <code>papers.json</code> 里加一条：<code>title / year / venue / era（时代归属）/ stage / new_cognition（它让领域相信了什么）/ corrects（它修正了谁的什么观点）/ problem·method·insight</code>。网页自动渲染，无需构建。完整 schema 见仓库 <code>README.md</code>。
+读完一篇论文，顺手在 <code>papers.json</code> 里加一条：<code>title / year / venue / era（主线归属）/ stage / new_cognition（它让领域相信了什么）/ corrects（它修正或推进了谁的什么观点，需能指出原文出处）/ problem·method·insight</code>。网页自动渲染，无需构建。完整 schema 见仓库 <code>README.md</code>。
 </div>
 </section>
 
@@ -105,7 +105,7 @@ const CHAINS=[
  {name:"范式之争：复杂度 vs 简单", steps:[
    ["Informer (2021)","ProbSparse attention 让 Transformer 能做长时序"],
    ["Autoformer (2021)","分解进架构：趋势/季节分开建模"],
-   ["DLinear (2023)","单层线性打平复杂 Transformer——复杂度≠效果，认知地震"],
+   ["DLinear (2023)","单层线性打平复杂 Transformer——复杂度≠效果"],
    ["PatchTST (2023)","Transformer 回春：之前是输入表征错了，不是架构错了"]],
   why:"核心争论：时序预测到底需要多复杂的模型？DLinear 把问题从'堆架构'扭回'表征与归纳偏置'。"},
  {name:"变量关系之争：独立 vs 联合", steps:[
@@ -113,25 +113,23 @@ const CHAINS=[
    ["iTransformer (2024)","inverted：变量当 token，变量间依赖值得建模"],
    ["vLinear (2026)","vecTrans：rank-1 轻量建模，即插即用"]],
   why:"从'要不要联合'到'怎么联合'再到'轻量联合'，争论焦点在变量维度的归纳偏置。"},
- {name:"生成式预测线：从采样到单步", steps:[
+ {name:"生成式预测线：从多步采样到直接监督", steps:[
    ["DeepAR (2017)","预测=输出分布，不只是点估计"],
    ["TimeGrad / CSDI (2021)","diffusion 做概率预测，代价是数百步采样"],
    ["TSFlow (2025)","flow matching + GP 先验，prior 设计是关键"],
-   ["vLinear (2026)","监督最终序列 > 监督速度场（+8.6%）"],
-   ["FlowCast (2026)","时序近似确定性映射，单步直达，100x 加速"]],
-  why:"一条清晰的'去间接化'链条：分布→速度场→最终序列→单步直达，每一步都在问'中间环节真的必要吗'。"},
- {name:"单步思想的跨领域迁移", steps:[
+   ["vLinear (2026, 预印本)","报告监督最终序列优于监督速度场（+8.6%）"]],
+  why:"一条'去间接化'的趋势：分布→速度场→最终序列，每一步都在问'中间环节真的必要吗'。推理步数仍是这条线的主要成本。"},
+ {name:"单步生成（图像侧，向时序迁移中）", steps:[
    ["MeanFlow (2025, 图像)","平均速度场，免蒸馏单步生成"],
-   ["TwinFlow (2026, 图像)","自对抗 flow，单模型扩展到 20B"],
-   ["FlowCast (2026, 时序)","平均速度思想迁入时序预测"]],
-  why:"图像→时序：单步生成思想的迁移史。注意 asymmetry：图像侧靠蒸馏，时序侧走免蒸馏。"}
+   ["TwinFlow (2026, 图像)","自对抗 flow，单模型扩展到 20B"]],
+  why:"图像侧已有两条免蒸馏单步路线（平均速度 / 自对抗）。它们在时序上是否同样有效，还需要实验验证。"}
 ];
 async function init(){
   DATA=await (await fetch('papers.json')).json();
   const papers=DATA.papers, stages=DATA.meta.stages, eras=DATA.meta.eras;
   const years=papers.map(p=>p.year);
   document.getElementById('stats').innerHTML=
-    `<span>📄 ${papers.length} 篇</span><span>⏳ ${eras.length} 个时代</span><span>📅 ${Math.min(...years)}–${Math.max(...years)}</span><span>⛓ ${CHAINS.length} 条思想链</span>`;
+    `<span>📄 ${papers.length} 篇</span><span>⏳ ${eras.length} 条主线</span><span>📅 ${Math.min(...years)}–${Math.max(...years)}</span><span>⛓ ${CHAINS.length} 条思想链</span>`;
   const chips=[["","全部"]].concat(stages.map(s=>[s.id,s.name]));
   document.getElementById('chips').innerHTML=chips.map(([v,n])=>
     `<span class="chip${v===''?' active':''}" data-v="${v}">${n}</span>`).join('');

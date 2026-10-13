@@ -36,23 +36,23 @@
 | `id` | ✓ | 唯一标识，格式 `短名-年份` |
 | `title` / `year` / `venue` / `authors` | ✓ | 基本信息 |
 | `stage` | ✓ | 所属 pipeline 阶段，8 选 1：`problem`（问题定义）`input`（输入处理）`decomposition`（分解）`backbone`（建模主干）`variables`（变量间关系）`loss`（损失函数）`inference`（推理采样）`evaluation`（评估） |
-| `era` | ✓ | 所属时代，4 选 1：`foundation`（奠基与生成式源头）`era1`（时代一·输入处理）`era2`（时代二·架构）`era3`（时代三·目标与推理）。时代定义在 `papers.json` 的 `meta.eras` 里 |
+| `era` | ✓ | 所属主线，4 选 1：`foundation`（奠基与生成式源头）`era1`（主线一·输入处理）`era2`（主线二·架构）`era3`（主线三·目标与推理）。主线是并行主题，年份可重叠；定义在 `papers.json` 的 `meta.eras` 里 |
 | `new_cognition` | ✓ | **核心**：这篇论文让领域相信了什么新观点 |
-| `corrects` | ✓ | **核心**：它修正/推翻了之前哪篇的什么旧观点 |
+| `corrects` | ✓ | **核心**：它修正或推进了之前哪篇的什么观点。被修正的观点必须能在原论文中找到出处；找不到就写成“此前主流做法是……”，不要构造无人主张过的稻草人 |
 | `corrected_by` | | 后续哪篇修正了它（形成思想链） |
 | `problem` / `method` / `insight` | | P/M/I 三元组 |
 | `links` | | `arxiv` / `doi` / `github` 链接 |
-| `tags` | | 标签，如 `author-work` 会显示"作者工作"徽标 |
+| `tags` | | 标签，如 `under-review` 表示投稿中 |
 
 ## 维护习惯
 
 读完一篇论文，顺手花 10 分钟加一条。重点写好 `new_cognition` 和 `corrects`——
-这是这个仓库区别于普通论文列表的全部价值。
+这是这个仓库区别于普通论文列表的全部价值。`venue` 如实标注预印本 / 投稿中；单篇结论不要写进阶段的"共识"描述。
 
 ## 思想链
 
 `index.html` 里的 `CHAINS` 数组定义了几条主线的修正链（后一篇回答前一篇的问题），
-有新主线时直接加。时代色带由 `papers.json` 的 `meta.eras` 驱动，加新时代时同步加。
+有新主线时直接加。主线色带由 `papers.json` 的 `meta.eras` 驱动，加新主线时同步加。
 
 ## 课题组深挖
 
